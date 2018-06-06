@@ -1,13 +1,16 @@
+package testing;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Scanner;
 
 import org.apache.http.HttpResponse;
+import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -21,6 +24,7 @@ public class WorkingMemberAdd {
 
 	private static String group_id = "41189646";
 	private static String testNumber = "2406886273";
+	private static String number = "9103786594";
 	private static String baseURL = "https://api.groupme.com/v3";
 	private static String auth;
 
@@ -28,22 +32,75 @@ public class WorkingMemberAdd {
 		auth = readAuth();
 
 		HttpClient client = HttpClientBuilder.create().build();
-		HttpGet get = new HttpGet(baseURL + "/groups/" + group_id + "?token=" + auth);
+		makeGroup(client);
+		addMember(client);
+		deleteGroup(client);
+	}
+	
+	public static void deleteGroup(HttpClient client) {
+		HttpPost delGroup = new HttpPost(baseURL + "/groups/" + group_id + "/destroy?token=" + auth);
+		try {
+			HttpResponse resp = client.execute(delGroup);
+		} catch (ClientProtocolException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	public static void makeGroup(HttpClient client) {
+		HttpPost nGroup = new HttpPost(baseURL + "/groups?token=" + auth);
+		JSONObject groupData = new JSONObject();
+		try {
+			groupData.put("name", "Test2");
+			groupData.put("description", "Create group");
+			nGroup.setEntity(new StringEntity(groupData.toString()));
+			HttpResponse resp = client.execute(nGroup);
+			JSONObject rData =  respsonseJSONConvert(resp);
+			group_id = (String) ((JSONObject)rData.get("response")).get("id");
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ClientProtocolException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
+	}
+
+	public static void delete(HttpClient client) {
+		HttpGet get = new HttpGet(baseURL + "/groups/" + group_id + "?token=" + auth);
+
 		try {
 			HttpResponse resp = client.execute(get);
-			JSONObject jO =  respsonseJSONConvert(resp);
+			JSONObject jO = respsonseJSONConvert(resp);
 			JSONObject response = (JSONObject) jO.get("response");
-			System.out.println(((JSONObject)jO.get("response")).get("name"));
+			System.out.println(((JSONObject) jO.get("response")).get("name"));
 			JSONArray arr = response.getJSONArray("members");
-//			JSONArray arr = .get("members");
-			System.out.println((String) ((JSONObject)arr.get(1)).get("id") 
-					+ "\n" + (String) ((JSONObject)arr.get(1)).get("user_id"));
-			deleteMember(client, (String) ((JSONObject)arr.get(1)).get("id"));
+			// JSONArray arr = .get("members");
+			for(int in = 0; in < arr.length(); in ++) {
+				System.out.println(((JSONObject)arr.get(in)).get("nickname"));
+			}
+			deleteMember(client, (String) ((JSONObject) arr.get(2)).get("id"));
+			System.out.println("Exit First");
+			Thread.sleep(3000);
+			deleteMember(client, (String) ((JSONObject) arr.get(1)).get("id"));
+			System.out.println("Exit Second");
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -58,8 +115,7 @@ public class WorkingMemberAdd {
 				build.append(line);
 			}
 			return new JSONObject(build.toString());
-			
-	
+
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -70,16 +126,19 @@ public class WorkingMemberAdd {
 	}
 
 	public static void deleteMember(HttpClient client, String memberId) {
-		HttpPost post = new HttpPost(baseURL + "/groups/" + group_id + 
-				"/members/" + memberId +"/remove?token=" + auth);
-		
+		System.out.println("Deleting: " + memberId);
+		HttpPost post = new HttpPost(
+				baseURL + "/groups/" + group_id + "/members/" + memberId + "/remove?token=" + auth);
+
 		try {
+			System.out.println("Delete Sam");
 			HttpResponse resp = client.execute(post);
 			System.out.println(resp.getStatusLine());
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		System.out.println("Exiting Delete");
 	}
 
 	public static void addMember(HttpClient client) {
@@ -91,7 +150,11 @@ public class WorkingMemberAdd {
 			JSONObject jul = new JSONObject();
 			jul.put("nickname", "Jules");
 			jul.put("phone_number", testNumber);
+			JSONObject sam = new JSONObject();
+			sam.put("nickname", "Sam");
+			sam.put("phone_number", number);
 			mems.put(0, jul);
+			mems.put(1, sam);
 			json.put("members", mems);
 			post.setEntity(new StringEntity(json.toString()));
 			HttpResponse resp = client.execute(post);

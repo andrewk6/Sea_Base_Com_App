@@ -6,6 +6,7 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" path="resources"/>
 	<classpathentry kind="lib" path="Jars/commons-codec-1.10.jar"/>
 	<classpathentry kind="lib" path="Jars/commons-logging-1.2.jar"/>
 	<classpathentry kind="lib" path="Jars/fluent-hc-4.5.5.jar"/>
