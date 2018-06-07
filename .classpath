@@ -18,5 +18,11 @@
 	<classpathentry kind="lib" path="Jars/java-json.jar"/>
 	<classpathentry kind="lib" path="Jars/jna-4.4.0.jar"/>
 	<classpathentry kind="lib" path="Jars/jna-platform-4.4.0.jar"/>
+	<classpathentry kind="lib" path="Jars/poi-3.17.jar"/>
+	<classpathentry kind="lib" path="Jars/poi-examples-3.17.jar"/>
+	<classpathentry kind="lib" path="Jars/poi-excelant-3.17.jar"/>
+	<classpathentry kind="lib" path="Jars/poi-ooxml-3.17.jar"/>
+	<classpathentry kind="lib" path="Jars/poi-ooxml-schemas-3.17.jar"/>
+	<classpathentry kind="lib" path="Jars/poi-scratchpad-3.17.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -1,5 +1,5 @@
 public class Groupme_Com{
-	boolean paused;
+	private boolean paused;
 	
 	public Groupme_Com() {
 		paused = false;
@@ -11,5 +11,9 @@ public class Groupme_Com{
 
 	public void setPaused(boolean paused) {
 		this.paused = paused;
+	}
+	
+	public void deleteGroups() {
+		
 	}
 }
