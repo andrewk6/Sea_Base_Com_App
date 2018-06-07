@@ -19,9 +19,13 @@ import org.joda.time.MutableDateTime;
 import org.joda.time.ReadableInstant;
 
 public class Test{
-	static ArrayList<String> snorkel, dock, beach, gear, midweek;
+	private ArrayList<String> snorkel, dock, beach, gear, midweek;
 	//Cell = 44 + Date Difference * 4
 	public static void main(String[]args) {
+		Test test = new Test();
+	}
+	
+	public Test() {
 		snorkel = new ArrayList<String>();
 		dock = new ArrayList<String>();
 		beach = new ArrayList<String>();
