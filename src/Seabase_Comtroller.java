@@ -29,8 +29,8 @@ public class Seabase_Comtroller{
 	
 	public Seabase_Comtroller() {
 		gCom = new Groupme_Com();
+		dScan = new DataScan(gCom);
 		morn = Calendar.getInstance();
-		
 		
 		buildTrayIcon();
 	}
@@ -62,7 +62,17 @@ public class Seabase_Comtroller{
 		});
 		Menu actions = new Menu("Actions");
 		MenuItem add = new MenuItem("Add");
+		add.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				gCom.makeGroups();
+			}
+		});
 		MenuItem del = new MenuItem("Delete");
+		del.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				gCom.deleteGroups();
+			}
+		});
 		pause.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if(gCom.isPaused()) {
@@ -170,15 +180,46 @@ public class Seabase_Comtroller{
 		sChangeTimes.add(pauseRes);
 		
 		JPanel cDisplay = new JPanel();
-		cDisplay.setPreferredSize(new Dimension(400, 300));
+		//cDisplay.setPreferredSize(new Dimension(400, 300));
 		sChangeTimes.setLayout(new FlowLayout());
-		cDisplay.setLayout(new GridLayout(1, 3));
-		cDisplay.add(new Text("Modify"), 0, 0);
-		cDisplay.add(new Text("Name"), 0, 1);
-		cDisplay.add(new Text("Position"), 0, 2);
+		int rows = gCom.getBeach().size() + gCom.getDock().size() + gCom.getGear().size() +
+				gCom.getMidweek().size() + gCom.getSnorkel().size() + 1;
+		System.out.println("Rows: " + rows);
+		cDisplay.setLayout(new GridLayout(rows, 2));
+		//cDisplay.add(new Text("Modify"), 0, 0);
+		cDisplay.add(new Text("Name"), 0, 0);
+		cDisplay.add(new Text("Position"), 0, 1);
+		int row = 1;
+		for(String s : gCom.getSnorkel()) {
+			cDisplay.add(new Text(s), row, 0);
+			cDisplay.add(new Text("Snorkel"), row, 1);
+			row++;
+		}
+		for(String s : gCom.getDock()) {
+			cDisplay.add(new Text(s), row, 0);
+			cDisplay.add(new Text("Dock"), row, 1);
+			row++;
+		}
+		for(String s : gCom.getBeach()) {
+			cDisplay.add(new Text(s), row, 0);
+			cDisplay.add(new Text("Beach/Luau"), row, 1);
+			row++;
+		}
+		for(String s : gCom.getGear()) {
+			cDisplay.add(new Text(s), row, 0);
+			cDisplay.add(new Text("Gear"), row, 1);
+			row++;
+		}
+		for(String s : gCom.getMidweek()) {
+			cDisplay.add(new Text(s), row, 0);
+			cDisplay.add(new Text("Midweek"), row, 1);
+			row++;
+		}
 		
 		
-		content.add(cDisplay, BorderLayout.CENTER);
+		JScrollPane cScrollDisplay = new JScrollPane(cDisplay);
+		cScrollDisplay.setPreferredSize(new Dimension(400, 300));
+		content.add(cScrollDisplay, BorderLayout.CENTER);
 		content.add(sChangeTimes, BorderLayout.SOUTH);
 		
 		frame.pack();
@@ -199,6 +240,7 @@ public class Seabase_Comtroller{
 			super();
 			this.setEditable(false);
 			this.setText(s);
+			this.setFont(new Font("Monospaced", Font.PLAIN, 10));
 		}
 	}
 	
