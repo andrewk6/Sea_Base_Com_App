@@ -36,7 +36,7 @@ public class Groupme_Com {
 	private HttpClient cl;
 
 	public Groupme_Com() {
-		fillStalker();
+		//fillStalker();
 		snorkel = new ArrayList<String>();
 		dock = new ArrayList<String>();
 		beach = new ArrayList<String>();
@@ -303,6 +303,14 @@ public class Groupme_Com {
 	}
 	public HashMap<String, String> getStalker() {
 		return stalkerSheet;
+	}
+	
+	public void clearArrays() {
+		snorkel.clear();
+		dock.clear();
+		beach.clear();
+		gear.clear();
+		midweek.clear();
 	}
 	
 	public static void jsonPrint(JSONObject resp) {

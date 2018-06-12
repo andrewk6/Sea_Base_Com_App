@@ -71,6 +71,7 @@ public class DataScan{
 		if(sched == null)
 			start();
 		try {
+			gCom.clearArrays();
 			//OPCPackage pkg = OPCPackage.open(new File("2018 Sailing Staff Schedule.xlsx"));
 			FileInputStream in = new FileInputStream(sched);
 			XSSFWorkbook wb = new XSSFWorkbook(in);
