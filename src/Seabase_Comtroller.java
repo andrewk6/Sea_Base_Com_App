@@ -6,10 +6,14 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Scanner;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -22,23 +26,61 @@ public class Seabase_Comtroller{
 	HashMap<String, String> gear;
 	HashMap<String, String> midweek;
 	
-	Groupme_Com gCom;
-	DataScan dScan;
-	Calendar morn, even;
+	private int mHour, eHour, mMin, eMin;
+	
+	
+	private final Font header = new Font("Monospaced", Font.BOLD, 12);
+	private final Font body = new Font("Monospaced", Font.PLAIN, 10);
+	
+	private Groupme_Com gCom;
+	private DataScan dScan;
+	private ScheduledExec mExec, eExec;
+	
+	//private Calendar morn, even;
 	
 	
 	public Seabase_Comtroller() {
 		gCom = new Groupme_Com();
 		dScan = new DataScan(gCom);
-		morn = Calendar.getInstance();
+		//morn = Calendar.getInstance();
 		
+		loadConfig();
+		
+		mExec = new ScheduledExec(new Runnable() {
+			public void run() {
+				dScan.readExcel();
+				gCom.makeGroups();
+			}
+		}, mHour, mMin, 0);
+		eExec = new ScheduledExec(new Runnable() {
+			public void run() {
+				gCom.deleteGroups();
+			}
+		}, (eHour + 12), eMin, 0);
+		mExec.startExecution();
+		eExec.startExecution();
 		buildTrayIcon();
+	}
+	
+	public void loadConfig() {
+		try {
+			Scanner in = new Scanner(new File("Config.bin"));
+			in.nextLine();
+			mHour = in.nextInt();
+			mMin = in.nextInt();
+			eHour = in.nextInt();
+			eMin = in.nextInt();
+			in.close();
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	public boolean buildTrayIcon() {
 		icon = null;
 		try {
-			icon = ImageIO.read(new File("Sail Icon.png"));
+			icon = ImageIO.read(this.getClass().getResourceAsStream("Sail Icon.png"));
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -52,7 +94,7 @@ public class Seabase_Comtroller{
 			}
 		});*/
 		MenuItem pause = new MenuItem("Pause");
-		TrayIcon tIcon = new TrayIcon(icon, "tray icon");
+		TrayIcon tIcon = new TrayIcon(icon, "Sea Base Com App");
 		SystemTray tray = SystemTray.getSystemTray();
 		MenuItem stats = new MenuItem("Status");
 		stats.addActionListener(new ActionListener() {
@@ -64,6 +106,7 @@ public class Seabase_Comtroller{
 		MenuItem add = new MenuItem("Add");
 		add.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				dScan.readExcel();
 				gCom.makeGroups();
 			}
 		});
@@ -143,12 +186,20 @@ public class Seabase_Comtroller{
 		content.setLayout(new BorderLayout());
 		
 		JPanel sChangeTimes = new JPanel();
-		sChangeTimes.add(new Text("Morning Time:"));
+		Text morn = new Text("Morning Time(AM): ");
+		morn.setBorder(null);
+		morn.setFont(header);
+		sChangeTimes.add(morn);
 		JTextField mTField = new JTextField();
+		mTField.setText(((mHour < 10) ? "0" + mHour : mHour) + ":" + ((mMin < 10) ? "0" + mMin : mMin));
 		mTField.setColumns(5);
 		sChangeTimes.add(mTField);
-		sChangeTimes.add(new Text("Evening Time: "));
+		Text even = new Text("Evening Time(PM): ");
+		even.setBorder(null);
+		even.setFont(header);
+		sChangeTimes.add(even);
 		JTextField eTField = new JTextField();
+		eTField.setText(((eHour < 10) ? "0" + eHour : eHour) + ":" + ((eMin < 10) ? "0" + eMin : eMin));
 		eTField.setColumns(5);
 		sChangeTimes.add(eTField);
 		JButton btn = new JButton("Update Time");
@@ -187,33 +238,27 @@ public class Seabase_Comtroller{
 		System.out.println("Rows: " + rows);
 		cDisplay.setLayout(new GridLayout(rows, 2));
 		//cDisplay.add(new Text("Modify"), 0, 0);
-		cDisplay.add(new Text("Name"), 0, 0);
-		cDisplay.add(new Text("Position"), 0, 1);
-		int row = 1;
+		cDisplay.add(new Text("Name", Text.TYPE_HEADER));
+		cDisplay.add(new Text("Position", Text.TYPE_HEADER));
 		for(String s : gCom.getSnorkel()) {
-			cDisplay.add(new Text(s), row, 0);
-			cDisplay.add(new Text("Snorkel"), row, 1);
-			row++;
+			cDisplay.add(new Text(s));
+			cDisplay.add(new Text("Snorkel"));
 		}
 		for(String s : gCom.getDock()) {
-			cDisplay.add(new Text(s), row, 0);
-			cDisplay.add(new Text("Dock"), row, 1);
-			row++;
+			cDisplay.add(new Text(s));
+			cDisplay.add(new Text("Dock"));
 		}
 		for(String s : gCom.getBeach()) {
-			cDisplay.add(new Text(s), row, 0);
-			cDisplay.add(new Text("Beach/Luau"), row, 1);
-			row++;
+			cDisplay.add(new Text(s));
+			cDisplay.add(new Text("Beach/Luau"));
 		}
 		for(String s : gCom.getGear()) {
-			cDisplay.add(new Text(s), row, 0);
-			cDisplay.add(new Text("Gear"), row, 1);
-			row++;
+			cDisplay.add(new Text(s));
+			cDisplay.add(new Text("Gear"));
 		}
 		for(String s : gCom.getMidweek()) {
-			cDisplay.add(new Text(s), row, 0);
-			cDisplay.add(new Text("Midweek"), row, 1);
-			row++;
+			cDisplay.add(new Text(s));
+			cDisplay.add(new Text("Midweek"));
 		}
 		
 		
@@ -227,10 +272,49 @@ public class Seabase_Comtroller{
 	}
 	
 	public void updateTime(String m, String e) {
-		//TODO: Add an update time function in Groupme_Com
+		try {
+			int mH = Integer.parseInt(m.split(":")[0]);
+			int mM = Integer.parseInt(m.split(":")[1]);
+			int eH = Integer.parseInt(e.split(":")[0]);
+			int eM = Integer.parseInt(e.split(":")[1]);
+			
+			if(mH <= 12 && mH >= 1 && mM <= 59 && mM >= 0 && 
+					eH <= 12 && eH >= 1 && eM <= 59 && eM >= 0) {
+				try {
+					Scanner in = new Scanner(new File("Config.bin"));
+					PrintWriter write = new PrintWriter(new FileWriter(new File("Config.bin")));
+					write.println(in.nextLine());
+					write.println(mH);
+					write.println(mM);
+					write.println(eH);
+					write.println(eM);
+					in.close();
+					write.close();
+					this.mHour = mH;
+					this.mMin = mM;
+					this.eHour = eH;
+					this.eMin = eM;
+				} catch (FileNotFoundException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			}else {
+				JOptionPane.showMessageDialog(null, "Invalid Number", 
+						"Error Message", JOptionPane.ERROR_MESSAGE);
+			}
+		}catch(NumberFormatException err) {
+			JOptionPane.showMessageDialog(null, "Invalid Number", 
+					"Error Message", JOptionPane.ERROR_MESSAGE);
+		}
 	}
 	
 	class Text extends JTextField{
+		public static final int TYPE_HEADER = 0;
+		public static final int TYPE_BODY = 1;
+		
 		public Text() {
 			super();
 			this.setEditable(false);
@@ -240,7 +324,14 @@ public class Seabase_Comtroller{
 			super();
 			this.setEditable(false);
 			this.setText(s);
-			this.setFont(new Font("Monospaced", Font.PLAIN, 10));
+			this.setFont(body);
+		}
+		
+		public Text(String s, int style) {
+			super();
+			this.setEditable(false);
+			this.setText(s);
+			this.setFont(((style == Text.TYPE_HEADER) ? header : body));
 		}
 	}
 	

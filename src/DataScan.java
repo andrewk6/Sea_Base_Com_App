@@ -37,7 +37,11 @@ public class DataScan{
 				PrintWriter write;
 				try {
 					write = new PrintWriter(new FileWriter(conf));
-					write.print(sched.getPath());
+					write.println(sched.getPath());
+					write.println(7);
+					write.println(0);
+					write.println(8);
+					write.println(0);
 					write.flush();
 					write.close();
 				} catch (IOException e) {
@@ -50,6 +54,10 @@ public class DataScan{
 				Scanner in = new Scanner(conf);
 				sched = new File(in.nextLine());
 				in.close();
+				if(!sched.exists()) {
+					conf.delete();
+					start();
+				}
 			} catch (FileNotFoundException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -64,7 +72,7 @@ public class DataScan{
 			start();
 		try {
 			//OPCPackage pkg = OPCPackage.open(new File("2018 Sailing Staff Schedule.xlsx"));
-			FileInputStream in = new FileInputStream(new File("2018 Sailing Staff Schedule.xlsx"));
+			FileInputStream in = new FileInputStream(sched);
 			XSSFWorkbook wb = new XSSFWorkbook(in);
 			XSSFSheet sht = wb.getSheetAt(0);
 			
@@ -77,7 +85,7 @@ public class DataScan{
 			int days = Days.daysBetween(date1 , date2).getDays() * 4;
 			System.out.println(days);
 			for(int c1 = days; c1 < days + 4; c1 ++) {
-				for(int c2 = 25; c2 < 30; c2 ++) {
+				for(int c2 = 25; c2 < 31; c2 ++) {
 					System.out.println("Row: " + c2 + " Cell: " + c1 + " Val: " +
 						sht.getRow(c2).getCell(c1).getStringCellValue());
 					if(c1 == days) {

@@ -36,7 +36,7 @@ public class Groupme_Com {
 	private HttpClient cl;
 
 	public Groupme_Com() {
-		//fillStalker();
+		fillStalker();
 		snorkel = new ArrayList<String>();
 		dock = new ArrayList<String>();
 		beach = new ArrayList<String>();
@@ -112,10 +112,26 @@ public class Groupme_Com {
 			JSONArray sendMems = new JSONArray();
 			for(String s : mems) {
 				System.out.println("Name: " + s + " / Number: " + stalkerSheet.get(s));
-				JSONObject mem = new JSONObject();
-				mem.put("nickname", s);
-				mem.put("phone_number", stalkerSheet.get(s));
-				sendMems.put(mem);
+				if(s.contains("(lead)"))
+					s = s.split("(lead)")[0];
+				else if(s.contains("(driving)"))
+					s = s.split("(driving)")[0];
+				else if(s.contains("(training)"))
+					s = s.split("(training)")[0];
+				if(s.contains("."))
+					s = s.replace(".", "");
+				s = s.trim();
+				if(!stalkerSheet.containsKey(s))
+					postAddFail(s, groupID);
+				else {
+					JSONObject mem = new JSONObject();
+					if(s.equals("Julia"))
+						mem.put("nickname", "Jules");
+					else
+						mem.put("nickname", s);
+					mem.put("phone_number", stalkerSheet.get(s));
+					sendMems.put(mem);
+				}
 			}
 			JSONObject postData = new JSONObject();
 			postData.put("members", sendMems);
@@ -188,6 +204,30 @@ public class Groupme_Com {
 			e.printStackTrace();
 		}
 	}
+	
+	public void postAddFail(String name, String groupID) {
+		JSONObject msg = new JSONObject();
+		try {
+			msg.put("source_guid", "GUID");
+			msg.put("text", name + " failed to be added to the group");
+			HttpPost post = new HttpPost(baseURL + "/groups/" + groupID + "/messages");
+			post.setEntity(new StringEntity(msg.toString()));
+			cl.execute(post);
+			post.releaseConnection();
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ClientProtocolException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 
 	public ArrayList<String> getSnorkel() {
 		return snorkel;
@@ -232,7 +272,7 @@ public class Groupme_Com {
 	public void fillStalker() {
 		stalkerSheet.put("Lukas", "7062470014");
 		stalkerSheet.put("Adam", "4352137528");
-		stalkerSheet.put("Will J.", "8435303527");
+		stalkerSheet.put("Will J", "8435303527");
 		stalkerSheet.put("Tara", "8473370337");
 		stalkerSheet.put("Anna", "3037269646");
 		stalkerSheet.put("Sean", "6103143092");
@@ -245,20 +285,20 @@ public class Groupme_Com {
 		stalkerSheet.put("Graci", "5186308723");
 		stalkerSheet.put("Thomas", "7039653038");
 		stalkerSheet.put("Noah", "7656674075");
-		stalkerSheet.put("Drew A.", "5402923482");
+		stalkerSheet.put("Drew A", "5402923482");
 		stalkerSheet.put("Jimmy", "3367105629");//NEED NUMBER
 		stalkerSheet.put("Kory", "3146297112");
 		stalkerSheet.put("Lexi", "8029890149");
 		stalkerSheet.put("Josh", "8179755390");
 		stalkerSheet.put("Lacey", "2552295323");
 		stalkerSheet.put("Lukas", "7062470014");
-		stalkerSheet.put("Andrew K.", "3015008562");
+		stalkerSheet.put("Andrew K", "3015008562");
 		stalkerSheet.put("Julia", "2406886273");
 		stalkerSheet.put("Alex", "5044013752");
 		stalkerSheet.put("Max", "9375722375");
 		stalkerSheet.put("Kumi", "8474214917");
-		stalkerSheet.put("John B.", "4784476157");
-		stalkerSheet.put("Mike O.", "3167063366");
+		stalkerSheet.put("John B", "4784476157");
+		stalkerSheet.put("Mike O", "3167063366");
 		stalkerSheet.put("Jacob", "9102321342");
 	}
 	public HashMap<String, String> getStalker() {
