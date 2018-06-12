@@ -127,7 +127,7 @@ public class Groupme_Com {
 					JSONObject mem = new JSONObject();
 					if(s.equals("Julia"))
 						mem.put("nickname", "Jules");
-					else
+					else 
 						mem.put("nickname", s);
 					mem.put("phone_number", stalkerSheet.get(s));
 					sendMems.put(mem);

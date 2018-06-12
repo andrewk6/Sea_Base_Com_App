@@ -104,7 +104,7 @@ public class DataScan{
 					}
 				}
 			}
-			gCom.getGear().add(sht.getRow(19).getCell(days+2).getStringCellValue().concat("(Quartermaster)"));
+			gCom.getGear().add(sht.getRow(19).getCell(days+2).getStringCellValue());
 			for(int c1 = days; c1 < days + 4; c1 ++) {
 				for(int c2 = 21; c2 < 23; c2 ++) {
 					String s = sht.getRow(c2).getCell(c1).getStringCellValue();
